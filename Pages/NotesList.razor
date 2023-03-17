@@ -1,0 +1,33 @@
+﻿@page "/Notes"
+
+<PageTitle>Notes</PageTitle>
+
+<h1>Notes</h1>
+
+<ul>
+@foreach (var note in Notes)
+{
+    <li><a href="/Notes/@(note.Url)">@(note.Name)</a></li>
+}  
+</ul>
+
+@code
+{
+    class Note
+    {
+        public string Name {get; set;}
+        public string Url {get; set;}
+    }
+
+    private List<Note> Notes = new List<Note>();
+    private const string NotesDir = "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks";
+    protected override void OnInitialized()
+    {
+        var dir = new DirectoryInfo(NotesDir);
+        var notes = dir.GetFiles();
+
+        Console.WriteLine(notes.Count());
+
+        Notes.AddRange(notes.Select(x => new Note{ Name = x.Name }));
+    }
+}

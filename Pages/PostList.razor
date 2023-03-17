@@ -1,0 +1,33 @@
+﻿@page "/Posts"
+
+<PageTitle>Posts</PageTitle>
+
+<h1>Posts</h1>
+
+<ul>
+@foreach (var post in Posts)
+{
+    <li><a href="/Post/@(post.Url)">@(post.Name)</a></li>
+}  
+</ul>
+
+@code
+{
+    class Post
+    {
+        public string Name {get; set;}
+        public string Url {get; set;}
+    }
+
+    private List<Post> Posts = new List<Post>();
+    private const string PostsDir = "/Users/miguelalho/code/miguelalho.github.io/content/posts";
+    protected override void OnInitialized()
+    {
+        var dir = new DirectoryInfo(PostsDir);
+        var posts = dir.GetFiles();
+
+        Console.WriteLine(posts.Count());
+
+        Posts.AddRange(posts.Select(x => new Post{ Name = x.Name }));
+    }
+}
