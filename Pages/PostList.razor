@@ -20,7 +20,10 @@
     }
 
     private List<Post> Posts = new List<Post>();
-    private const string PostsDir = "/Users/miguelalho/code/miguelalho.github.io/content/posts";
+    private string PostsDir = OperatingSystem.IsMacOS()
+        ? "/Users/miguelalho/code/miguelalho.github.io/content/posts"
+        : "c:/src/miguelalho.github.io/content/posts";
+        
     protected override void OnInitialized()
     {
         var dir = new DirectoryInfo(PostsDir);
