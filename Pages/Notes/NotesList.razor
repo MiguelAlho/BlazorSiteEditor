@@ -1,0 +1,42 @@
+﻿@page "/Notes"
+
+<PageTitle>Notes</PageTitle>
+
+<h1>Notes</h1>
+<MudToolBar>
+    <MudSpacer />
+    <MudButton ButtonType="ButtonType.Button" Title="Add Video Note"
+                Href=@($"/Notes/NewVideoNote")
+                StartIcon="@Icons.Material.Filled.Add" Color="@Color.Success">
+        Add Video Note
+    </MudButton>
+</MudToolBar>
+
+<ul>
+@foreach (var note in Notes)
+{
+    <li><a href="/Notes/Edit/@(note.Url)">@(note.Name)</a></li>
+}  
+</ul>
+
+@code
+{
+    class Note
+    {
+        public string Name {get; set;}
+        public string Url {get; set;}
+    }
+
+    private List<Note> Notes = new List<Note>();
+
+    private string NotesDir = OperatingSystem.IsMacOS()
+        ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
+        : "c:/src/miguelalho.github.io/content/bookmarks";
+            
+    protected override void OnInitialized()
+    {
+        var dir = new DirectoryInfo(NotesDir);
+        var notes = dir.GetFiles();
+        Notes.AddRange(notes.Select(x => new Note{ Name = x.Name , Url = x.Name }));
+    }
+}

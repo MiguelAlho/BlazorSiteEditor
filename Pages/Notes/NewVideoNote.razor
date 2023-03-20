@@ -1,0 +1,167 @@
+@page "/Notes/NewVideoNote"
+
+<h1>Add New Video Note</h1>
+
+<PageTitle>Add new video note</PageTitle>
+
+<MudTimeline TimelinePosition="TimelinePosition.Start">
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End" >
+        <ItemContent>
+            Start by adding the video link
+            <MudTextField T="string"  @bind-Value="NewNote.Url" 
+                        Label="Video Link" Required="true" 
+                        RequiredError="Title is required!"
+                        />
+            <MudTextField T="string"  @bind-Value="NewNote.Title" Label="Title" 
+                Required="true" RequiredError="Title is required!"/>
+        </ItemContent>
+    </MudTimelineItem>
+
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
+        <ItemContent>
+            <h3>Post meta</h3>
+            <MudTextField T="string"  @bind-Value="NewNote.Author" Label="Author" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.Type" Label="Entry Type" Required="true" RequiredError="Title is required!"/>            
+        </ItemContent>
+    </MudTimelineItem>
+
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
+        <ItemContent>
+            <h3>Video meta</h3>
+
+            <h4>Talk Author</h4>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Name" Label="Talk Author Name" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Twitter" Label="Twitter" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.LinkedIn" Label="Linkedin" Required="true" RequiredError="Title is required!"/>            
+
+            <h4>Talk Context</h4>
+            @* <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Event" Label="Talk Author Name" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Name" Label="Twitter" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Date" Label="Twitter" Required="true" RequiredError="Title is required!"/>
+            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Link" Label="Linkedin" Required="true" RequiredError="Title is required!"/>             *@
+        </ItemContent>
+    </MudTimelineItem>
+
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
+        <ItemContent>
+            <h3>Data:</h3>
+
+            <MudButton>
+                Save
+            </MudButton>
+        </ItemContent>
+    </MudTimelineItem>
+
+
+</MudTimeline>
+@code
+{
+    public string VideoLink {get; set;} = string.Empty;
+    public Note NewNote {get; set;} = new();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private string CurrentNoteFilePath = string.Empty;
+    private string currentFileContent = string.Empty;
+
+    [Parameter]
+    public string? NoteFileName { get; set; }
+
+    private string NotesDir = OperatingSystem.IsMacOS()
+        ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
+        : "c:/src/miguelalho.github.io/content/bookmarks";
+            
+
+
+
+
+
+
+
+    public class Note
+    {
+        public string Title {get; set;}= string.Empty;
+        public DateTime Date {get;set;} = DateTime.Now;
+        public string Author {get; set;}= "Miguel Alho";
+        public string Type {get; set;} = "bookmarks";
+        public string Url {get;set;} = default!;
+        public List<string> Tags {get; set;} = new();
+        public string Summary {get; set;} = string.Empty;
+        public Author TalkAuthor { get; set; } = new();
+        public Video Video { get; set; } = new();
+
+        public List<Entry> Notes {get; set;} = new List<Entry>();
+
+        public string Content {get;set;} = string.Empty;
+    }
+
+    public class Entry
+    {
+        public EntryType Type {get;set;} = EntryType.Quote;
+        public string Time {get;set;} = string.Empty;
+
+        public string Image {get;set;} = string.Empty;
+        public string Title {get;set;} = string.Empty;
+        public string Content {get;set;} = string.Empty;
+        public string Comment {get;set;} = string.Empty;
+    }
+
+    public enum EntryType
+    {
+        Quote,
+        Slide,
+        Note,        
+    }
+
+
+    public class Author
+    {
+        public string Name {get;set;} = string.Empty;
+        public string Twitter {get;set;} = string.Empty;
+        public string LinkedIn {get;set;} = string.Empty;
+    }
+
+    public class Video
+    {
+        public string Source {get;set;} = "youtube";
+        public string Id {get;set;} = string.Empty;
+        public string Link {get;set;} = string.Empty;
+        public Context Context {get;set;} = new Context();
+    }
+
+    public class Context
+    {
+        public string Event {get;set;} = "conference";
+        public string Name {get;set;} = string.Empty;
+        public DateOnly? date {get;set;} = null;
+        public string Link {get;set;} = string.Empty;
+
+    }
+
+}
