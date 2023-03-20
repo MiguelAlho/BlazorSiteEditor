@@ -1,4 +1,5 @@
 @page "/Notes/NewVideoNote"
+@inject NavigationManager NavManager
 
 <h1>Add New Video Note</h1>
 
@@ -8,20 +9,19 @@
     <MudTimelineItem TimelineAlign="@TimelineAlign.End" >
         <ItemContent>
             Start by adding the video link
-            <MudTextField T="string"  @bind-Value="NewNote.Url" 
+            <MudTextField T="string"  @bind-Value="VideoLink" 
                         Label="Video Link" Required="true" 
                         RequiredError="Title is required!"
+                        OnChange="ValidateVideoUrl"
                         />
+            <MudButton OnClick="TryLoadMetadata">
+                Load Video Metadata
+            </MudButton>
             <MudTextField T="string"  @bind-Value="NewNote.Title" Label="Title" 
                 Required="true" RequiredError="Title is required!"/>
-        </ItemContent>
-    </MudTimelineItem>
-
-    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
-        <ItemContent>
-            <h3>Post meta</h3>
-            <MudTextField T="string"  @bind-Value="NewNote.Author" Label="Author" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.Type" Label="Entry Type" Required="true" RequiredError="Title is required!"/>            
+                
+            <MudTextField T="string"  @bind-Value="NewNote.Url" Label="Page Url" 
+                Required="true" RequiredError="Url is required!"/>
         </ItemContent>
     </MudTimelineItem>
 
@@ -30,15 +30,13 @@
             <h3>Video meta</h3>
 
             <h4>Talk Author</h4>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Name" Label="Talk Author Name" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Twitter" Label="Twitter" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.LinkedIn" Label="Linkedin" Required="true" RequiredError="Title is required!"/>            
+            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.Name" Label="Talk Author Name" />
+            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.Twitter" Label="Twitter" />
+            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.LinkedIn" Label="Linkedin" />            
 
             <h4>Talk Context</h4>
-            @* <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Event" Label="Talk Author Name" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Name" Label="Twitter" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Date" Label="Twitter" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="NewNote.TalkAuthor.Context.Link" Label="Linkedin" Required="true" RequiredError="Title is required!"/>             *@
+            <MudTextField T="string"  @bind-Value="NewNote.Video.Context.Name" Label="Event Name" />
+            <MudTextField T="string"  @bind-Value="NewNote.Video.Context.Link" Label="Event Link" />
         </ItemContent>
     </MudTimelineItem>
 
@@ -46,7 +44,7 @@
         <ItemContent>
             <h3>Data:</h3>
 
-            <MudButton>
+            <MudButton OnClick="OnSave">
                 Save
             </MudButton>
         </ItemContent>
@@ -59,6 +57,64 @@
     public string VideoLink {get; set;} = string.Empty;
     public Note NewNote {get; set;} = new();
 
+    protected override void OnInitialized()
+    {
+
+    }
+    
+    public async Task TryLoadMetadata()
+    {
+        var url = new System.Uri(VideoLink);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(url.Query);
+        var id = queryParams["v"];
+
+        using var client = new HttpClient();
+        var content = await client.GetStringAsync(url);
+
+        Regex regex = new Regex(@"""title"":{""simpleText"":""([^""]+)""}");
+        Match match = regex.Match(content);
+        if (match.Success)
+        {
+            NewNote.Title = match.Groups[1].Value;
+        }
+
+        NewNote.Url = $"/bookmark-{NewNote.Title.Replace(" ","-")}";
+        NewNote.Video.Id = id;
+        NewNote.Video.Link = $"https://www.youtube.com/embed/{id}";
+
+        StateHasChanged();
+    }
+
+    public void OnSave()
+    {
+        try{
+            var deserializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
+                .Build();
+            var yaml = deserializer.Serialize(NewNote);
+            Console.WriteLine(yaml);
+
+            var notesDir = OperatingSystem.IsMacOS()
+                ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
+                : "c:/src/miguelalho.github.io/content/bookmarks";
+            var fileName = $"{NewNote.Url.Replace("/","")}.md";
+            var filePath = Path.Combine(notesDir, fileName);
+
+            //System.IO.File.Create(filePath);
+            System.IO.File.AppendAllLines(filePath, new[]{"---"});
+            System.IO.File.AppendAllText(filePath, yaml);
+            System.IO.File.AppendAllLines(filePath, new[]{"---"});
+
+            NavManager.NavigateTo($"/Notes/Edit/{fileName}");
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+            Console.WriteLine(ex.InnerException);
+        }
+
+        
+
+    }
 
 
 
@@ -85,13 +141,6 @@
 
 
 
-
-
-    private string CurrentNoteFilePath = string.Empty;
-    private string currentFileContent = string.Empty;
-
-    [Parameter]
-    public string? NoteFileName { get; set; }
 
     private string NotesDir = OperatingSystem.IsMacOS()
         ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
@@ -109,13 +158,14 @@
         public string Title {get; set;}= string.Empty;
         public DateTime Date {get;set;} = DateTime.Now;
         public string Author {get; set;}= "Miguel Alho";
-        public string Type {get; set;} = "bookmarks";
-        public string Url {get;set;} = default!;
+        public string Url {get;set;} = string.Empty;
+
         public List<string> Tags {get; set;} = new();
-        public string Summary {get; set;} = string.Empty;
-        public Author TalkAuthor { get; set; } = new();
+
         public Video Video { get; set; } = new();
 
+        public string Summary {get; set;} = string.Empty;
+        
         public List<Entry> Notes {get; set;} = new List<Entry>();
 
         public string Content {get;set;} = string.Empty;
@@ -152,14 +202,15 @@
         public string Source {get;set;} = "youtube";
         public string Id {get;set;} = string.Empty;
         public string Link {get;set;} = string.Empty;
+
+        public Author TalkAuthor { get; set; } = new();
         public Context Context {get;set;} = new Context();
     }
 
     public class Context
     {
-        public string Event {get;set;} = "conference";
+        
         public string Name {get;set;} = string.Empty;
-        public DateOnly? date {get;set;} = null;
         public string Link {get;set;} = string.Empty;
 
     }
