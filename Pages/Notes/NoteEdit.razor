@@ -87,25 +87,36 @@
                 </MudItem>
                 <MudItem xs="6">
                     <MudStack Class="pa-8">
-
+                        <MudToolBar>
+                            <MudSpacer></MudSpacer>
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"></MudIconButton>
+                        </MudToolBar>
                         @foreach (var note in CurrentNote.Notes)
                         {
-                            <MudPaper>
-                                <MudStack>
-                                    @(note.Time) @(note.Title)<br/>
+                            <MudCard>
+                                <MudCardHeader>
+                                    <b>@(note.Time) @(note.Title)</b>
+                                    <hr/>
+                                </MudCardHeader>
+                                <MudCardContent>
                                     @if (!String.IsNullOrWhiteSpace(note.Image))
                                     {
-                                        var path = $"{UserDefinitionsService.SiteRepositoryPath}/static/bookmarks/{note.Image}";
-                                        var ext = Path.GetExtension(path);
-                                        var data = Convert.ToBase64String(File.ReadAllBytes(path));
-                                        <img src="data:image/@ext;base64,@data" />
+                                        <img src="@ImageToBase64DataSource(note)" style="width:100%"/>
                                     }
-                                    <blockquote>
-                                        @((MarkupString) @Markdown.ToHtml(@note.Content))<br/>
-                                    </blockquote>
-                                    <blockquote>@note.Comment</blockquote>
-                                </MudStack>
-                            </MudPaper>
+                                    @if (!String.IsNullOrWhiteSpace(note.Content))
+                                    {
+                                        <blockquote class="pa-4">
+                                            @((MarkupString) (@Markdown.ToHtml(@note.Content) ?? ""))<br/>
+                                        </blockquote>
+                                    }
+                                    <blockquote class="pa-4">@note.Comment</blockquote>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton>Edit</MudButton>
+                                    <MudButton>Remove</MudButton>
+                                </MudCardActions>
+                            </MudCard>
                         }
 
                     </MudStack>
@@ -171,4 +182,11 @@
     }
 
 
+    private static string ImageToBase64DataSource(Entry note)
+    {
+        var path = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{note.Image}";
+        var ext = Path.GetExtension(path);
+        var data = Convert.ToBase64String(File.ReadAllBytes(path));
+        return $"data:image/{ext};base64,{data}";
+    }
 }

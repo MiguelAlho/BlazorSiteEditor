@@ -32,6 +32,15 @@ class UserDefinitionsService
             return $"{definitions.SiteRepositoryPath}{definitions.BookmarksFolderPath}";
         }
     }
+
+    public static string BookmarkImagesBaseFolderPath
+    {
+        get
+        {
+            var definitions = Load();
+            return $"{definitions.SiteRepositoryPath}{definitions.BookmarkImagesBaseFolderPath}";
+        }
+    }
         
 
 }
@@ -41,4 +50,5 @@ public class UserDefinitions
     public string SiteRepositoryPath {get;set;} = string.Empty;
     public string BookmarksFolderPath {get;set;} = "/content/bookmarks";
     public string PostsFolderPath {get;set;} = "/content/posts";
+    public string BookmarkImagesBaseFolderPath { get; set; } = "/static/bookmarks";
 }
