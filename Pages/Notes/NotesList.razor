@@ -29,9 +29,7 @@
 
     private List<Note> Notes = new List<Note>();
 
-    private string NotesDir = OperatingSystem.IsMacOS()
-        ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
-        : "c:/src/miguelalho.github.io/content/bookmarks";
+    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
             
     protected override void OnInitialized()
     {

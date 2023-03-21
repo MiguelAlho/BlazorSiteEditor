@@ -1,0 +1,60 @@
+@page "/Settings"
+@inject UserDefinitionsService UserDefinitionsService
+
+<PageTitle>Settings</PageTitle>
+
+<h1>Settings</h1>
+
+<MudTextField T="string"  @bind-Value="Model.SiteRepositoryPath" 
+            Label="Path to site repository" Required="true" 
+            RequiredError="Path is required!"
+            />
+<MudButton OnClick="ValidatePath">
+    ValidatePath
+</MudButton>
+
+@if (pathIsValid)
+{
+    <span>Path is valid.</span>
+}else{
+    <span>Path does not exist.</span>
+}
+
+<MudButton OnClick="Save">
+    Save settings
+</MudButton>
+
+@if (saved)
+{
+    <span>saved!</span>
+}else{
+    <span>not Saved</span>
+}
+
+@code
+{
+    public UserDefinitions Model {get; set;} = new();
+
+    private bool pathIsValid = false;
+    private bool saved = false;
+
+    protected override void OnInitialized()
+    {
+        if(!UserDefinitionsService.Exists())
+            return;
+
+        Model = UserDefinitionsService.Load();
+    }
+
+    public void ValidatePath()
+    {
+        pathIsValid = Directory.Exists(Model.SiteRepositoryPath);
+        Console.WriteLine(pathIsValid);
+        StateHasChanged();
+    }
+
+    public void Save()
+    {
+        UserDefinitionsService.Save(Model);
+    }
+}
