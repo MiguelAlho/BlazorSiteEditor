@@ -1,4 +1,5 @@
 @page "/Notes/Edit/{NoteFileName}"
+@using MiguelAlho.BlazorSiteEditor.Models
 
 <PageTitle>@CurrentNote.Title</PageTitle>
 
@@ -7,10 +8,8 @@
 <MudTabs>
     <MudTabPanel Text="Meta" >
         <section>
-            <MudTextField T="string"  @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="CurrentNote.Type" Label="Entry Type" Required="true" RequiredError="Title is required!"/>
-            <MudTextField T="string"  @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Title is required!"/>
-            
+            <MudTextField T="string"  @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Author is required!"/>
+            <MudTextField T="string"  @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Title is required!"/>            
             <MudTextField T="string"  @bind-Value="CurrentNote.Summary" Label="Bookmark Type" Required="true" RequiredError="Title is required!" Lines=5/>
         </section>
     </MudTabPanel>
@@ -61,9 +60,7 @@
     [Parameter]
     public string? NoteFileName { get; set; }
 
-    private string NotesDir = OperatingSystem.IsMacOS()
-        ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
-        : "c:/src/miguelalho.github.io/content/bookmarks";
+    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
             
     protected override void OnInitialized()
     {
@@ -94,73 +91,4 @@
 
         StateHasChanged();
     }
-
-
-    public class Note
-    {
-        public string Title {get; set;}= string.Empty;
-        public DateTime Date {get;set;} = DateTime.Now;
-        public string Author {get; set;}= "Miguel Alho";
-        public string Type {get; set;} = "bookmarks";
-        public string Url {get;set;} = default!;
-        public List<string> Tags {get; set;} = new();
-        public string Summary {get; set;} = string.Empty;
-        public Author TalkAuthor { get; set; } = new();
-        public Video Video { get; set; } = new();
-
-        public List<Entry> Notes {get; set;} = new List<Entry>();
-
-        public string Content {get;set;} = string.Empty;
-    }
-
-    public class Entry
-    {
-        public EntryType Type {get;set;} = EntryType.Quote;
-        public string Time {get;set;} = string.Empty;
-
-        public string Image {get;set;} = string.Empty;
-        public string Title {get;set;} = string.Empty;
-        public string Content {get;set;} = string.Empty;
-        public string Comment {get;set;} = string.Empty;
-    }
-
-    public enum EntryType
-    {
-        Quote,
-        Slide,
-        Note,        
-    }
-
-    public class Bookmark
-    {
-        public string Type { get; set; } = string.Empty;
-        public Author Author { get; set; } = new();
-        public Video Video { get; set; } = new();
-        public Dictionary<string, string> Context { get; set; } = new();
-    }
-
-    public class Author
-    {
-        public string Name {get;set;} = string.Empty;
-        public string Twitter {get;set;} = string.Empty;
-        public string LinkedIn {get;set;} = string.Empty;
-    }
-
-    public class Video
-    {
-        public string Source {get;set;} = "youtube";
-        public string Id {get;set;} = string.Empty;
-        public string Link {get;set;} = string.Empty;
-        public Context Context {get;set;} = new Context();
-    }
-
-    public class Context
-    {
-        public string Event {get;set;} = "conference";
-        public string Name {get;set;} = string.Empty;
-        public DateOnly? date {get;set;} = null;
-        public string Link {get;set;} = string.Empty;
-
-    }
-
 }

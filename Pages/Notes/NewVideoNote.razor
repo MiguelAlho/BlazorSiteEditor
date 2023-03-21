@@ -1,5 +1,6 @@
 @page "/Notes/NewVideoNote"
 @inject NavigationManager NavManager
+@using MiguelAlho.BlazorSiteEditor.Models;
 
 <h1>Add New Video Note</h1>
 
@@ -30,9 +31,9 @@
             <h3>Video meta</h3>
 
             <h4>Talk Author</h4>
-            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.Name" Label="Talk Author Name" />
-            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.Twitter" Label="Twitter" />
-            <MudTextField T="string"  @bind-Value="NewNote.Video.TalkAuthor.LinkedIn" Label="Linkedin" />            
+            <MudTextField T="string"  @bind-Value="NewNote.Video.Author.Name" Label="Talk Author Name" />
+            <MudTextField T="string"  @bind-Value="NewNote.Video.Author.Twitter" Label="Twitter" />
+            <MudTextField T="string"  @bind-Value="NewNote.Video.Author.LinkedIn" Label="Linkedin" />            
 
             <h4>Talk Context</h4>
             <MudTextField T="string"  @bind-Value="NewNote.Video.Context.Name" Label="Event Name" />
@@ -94,9 +95,7 @@
             var yaml = deserializer.Serialize(NewNote);
             Console.WriteLine(yaml);
 
-            var notesDir = OperatingSystem.IsMacOS()
-                ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
-                : "c:/src/miguelalho.github.io/content/bookmarks";
+            var notesDir = UserDefinitionsService.BookmarksFolderPath;
             var fileName = $"{NewNote.Url.Replace("/","")}.md";
             var filePath = Path.Combine(notesDir, fileName);
 
@@ -115,104 +114,4 @@
         
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private string NotesDir = OperatingSystem.IsMacOS()
-        ? "/Users/miguelalho/code/miguelalho.github.io/content/bookmarks"
-        : "c:/src/miguelalho.github.io/content/bookmarks";
-            
-
-
-
-
-
-
-
-    public class Note
-    {
-        public string Title {get; set;}= string.Empty;
-        public DateTime Date {get;set;} = DateTime.Now;
-        public string Author {get; set;}= "Miguel Alho";
-        public string Url {get;set;} = string.Empty;
-
-        public List<string> Tags {get; set;} = new();
-
-        public Video Video { get; set; } = new();
-
-        public string Summary {get; set;} = string.Empty;
-        
-        public List<Entry> Notes {get; set;} = new List<Entry>();
-
-        public string Content {get;set;} = string.Empty;
-    }
-
-    public class Entry
-    {
-        public EntryType Type {get;set;} = EntryType.Quote;
-        public string Time {get;set;} = string.Empty;
-
-        public string Image {get;set;} = string.Empty;
-        public string Title {get;set;} = string.Empty;
-        public string Content {get;set;} = string.Empty;
-        public string Comment {get;set;} = string.Empty;
-    }
-
-    public enum EntryType
-    {
-        Quote,
-        Slide,
-        Note,        
-    }
-
-
-    public class Author
-    {
-        public string Name {get;set;} = string.Empty;
-        public string Twitter {get;set;} = string.Empty;
-        public string LinkedIn {get;set;} = string.Empty;
-    }
-
-    public class Video
-    {
-        public string Source {get;set;} = "youtube";
-        public string Id {get;set;} = string.Empty;
-        public string Link {get;set;} = string.Empty;
-
-        public Author TalkAuthor { get; set; } = new();
-        public Context Context {get;set;} = new Context();
-    }
-
-    public class Context
-    {
-        
-        public string Name {get;set;} = string.Empty;
-        public string Link {get;set;} = string.Empty;
-
-    }
-
 }
