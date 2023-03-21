@@ -8,13 +8,17 @@
     <MudAppBar>
         Hugo Data Editor
         <MudToolBar>
-            <a href="/Posts">Posts</a>
-            <a href="/Notes">Notes</a>
-            <a href="/Settings">Settings</a>
+            <MudStack Row="true">
+                <a href="/Posts">Posts</a>
+                <a href="/Notes">Notes</a>
+                <a href="/Settings">Settings</a>
+            </MudStack>
         </MudToolBar>
     </MudAppBar>
 
     <MudMainContent>
-        @Body
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>

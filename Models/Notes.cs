@@ -5,16 +5,15 @@ namespace MiguelAlho.BlazorSiteEditor.Models;
         public string Title {get; set;}= string.Empty;
         public DateTime Date {get;set;} = DateTime.Now;
         public string Author {get; set;}= "Miguel Alho";
-        public string Type {get; set;} = "bookmarks";
+        public bool Draft {get; set;} = true;
         public string Url {get;set;} = default!;
         public List<string> Tags {get; set;} = new();
-        public string Summary {get; set;} = string.Empty;
-        
         public Video Video { get; set; } = new();
 
+        public string Summary {get; set;} = string.Empty;
         public List<Entry> Notes {get; set;} = new List<Entry>();
-
         public string Content {get;set;} = string.Empty;
+        
     }
 
     public class Entry

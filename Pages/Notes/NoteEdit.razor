@@ -1,89 +1,167 @@
 @page "/Notes/Edit/{NoteFileName}"
 @using MiguelAlho.BlazorSiteEditor.Models
+@using MudBlazor.Extensions
 
-<PageTitle>@CurrentNote.Title</PageTitle>
+<PageTitle>Edit - @CurrentNote.Title</PageTitle>
 
-<MudTextField T="string"  @bind-Value="CurrentNote.Title" Label="Title" Required="true" RequiredError="Title is required!"/>
-            
-<MudTabs>
-    <MudTabPanel Text="Meta" >
-        <section>
-            <MudTextField T="string"  @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Author is required!"/>
-            <MudTextField T="string"  @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Title is required!"/>            
-            <MudTextField T="string"  @bind-Value="CurrentNote.Summary" Label="Bookmark Type" Required="true" RequiredError="Title is required!" Lines=5/>
-        </section>
-    </MudTabPanel>
-    <MudTabPanel Text="Video Notes" >
-        <MudGrid>
-            <MudItem xs="6">
-                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
-                    <figure class="image is-16by9" >
-                        <iframe 
-                            id="bookmark-video"
-                            class="has-ratio"
-                            src="@(CurrentNote.Video.Link)?enablejsapi=1"
-                            title="YouTube video player"
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen>
-                        </iframe>
-                    </figure>
+
+<MudPaper Class="pa-8">
+    <MudTabs Border="true">
+        <MudTabPanel Text="Meta">
+            <MudStack>
+                <MudPaper Class="pa-8">
+                    <MudTextField T="string" @bind-Value="CurrentNote.Title" Label="Title" Required="true" RequiredError="Title is required!"/>
                 </MudPaper>
-            </MudItem>
-            <MudItem xs="6">
-                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
-                    <ul>@foreach (var note in CurrentNote.Notes)
-                    {
-                        <li>@(note.Time)<br />
-                        <blockquote>@((MarkupString)@Markdown.ToHtml(@note.Content))<br/></blockquote>
-                        <blockquote>@note.Comment</blockquote>
-                        </li>
-                    }
-                    </ul>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    </MudTabPanel>
-    <MudTabPanel Text="File Content" >
-        <h2>Yaml</h2>
-        @currentFileContent
-    </MudTabPanel>
 
-</MudTabs>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudPaper Class="pa-8">
+                            <h3>Page Metadata</h3>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Author is required!"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Title is required!"/>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudPaper Class="pa-8">
+                            <h3>Video Metadata</h3>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Source" Label="Source" Required="true" RequiredError="Source is required!"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Id" Label="Id" Required="true" RequiredError="Id is required!"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Link" Label="Url" Required="true" RequiredError="Url is required!"/>
+                            <h4>Speaker</h4>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Name" Label="Speaker Type"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Twitter" Label="Speaker Twitter"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.LinkedIn" Label="Speaker LinkedIn"/>
+                            <h4>Event</h4>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Name" Label="Event Name"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Link" Label="Event Link"/>
+
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Video Notes">
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudPaper Class="pa-8">
+                        <MudStack>
+                            <figure style="height: 500px;width: 100%;">
+                                <iframe
+                                    id="bookmark-video"
+                                    class="has-ratio"
+                                    src="@(CurrentNote.Video.Link)?enablejsapi=1"
+                                    title="YouTube video player"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen>
+                                </iframe>
+                            </figure>
+                            <MudToolBar>
+                                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Pause"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"></MudIconButton>
+                                <MudSpacer></MudSpacer>
+                                <MudIconButton Icon="@Icons.Material.Filled.Note"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Comment"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Screenshot"></MudIconButton>
+                            </MudToolBar>
+                        </MudStack>
+                    </MudPaper>
+                    <MudPaper Class="pa-8">
+                        <MudStack>
+                            @* <MudTextField T="string" @bind-Value="CurrentEntry.Type.ToString()" Label="Type" Required="true" RequiredError="Type is required!"/> *@
+                            <MudStack Row="true">
+                                <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
+                                <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
+                            </MudStack>
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to"/>
+
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
+                            <MudButton>Add</MudButton>
+                            <MudButton>Clear</MudButton>
+                        </MudStack>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+                    <MudStack Class="pa-8">
+
+                        @foreach (var note in CurrentNote.Notes)
+                        {
+                            <MudPaper>
+                                <MudStack>
+                                    @(note.Time) @(note.Title)<br/>
+                                    @if (!String.IsNullOrWhiteSpace(note.Image))
+                                    {
+                                        var path = $"{UserDefinitionsService.SiteRepositoryPath}/static/bookmarks/{note.Image}";
+                                        var ext = Path.GetExtension(path);
+                                        var data = Convert.ToBase64String(File.ReadAllBytes(path));
+                                        <img src="data:image/@ext;base64,@data" />
+                                    }
+                                    <blockquote>
+                                        @((MarkupString) @Markdown.ToHtml(@note.Content))<br/>
+                                    </blockquote>
+                                    <blockquote>@note.Comment</blockquote>
+                                </MudStack>
+                            </MudPaper>
+                        }
+
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="File Content">
+            <div Class="pa-8">
+                <h2>Yaml</h2>
+                <pre>@currentFileContent</pre>
+            </div>
+        </MudTabPanel>
+
+    </MudTabs>
+</MudPaper>
+
 
 @code
 {
-    public Note CurrentNote {get; set;} = new();
+    public Note CurrentNote { get; set; } = new();
+    public Entry CurrentEntry { get; set; } = new();
+
+    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
+
+
     private string CurrentNoteFilePath = string.Empty;
     private string currentFileContent = string.Empty;
 
     [Parameter]
     public string? NoteFileName { get; set; }
 
-    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
-            
+
     protected override void OnInitialized()
     {
-        if(String.IsNullOrWhiteSpace(NoteFileName))
+        if (String.IsNullOrWhiteSpace(NoteFileName))
             return;
 
         var dir = new DirectoryInfo(NotesDir);
         CurrentNoteFilePath = Path.Combine(dir.FullName, NoteFileName);
 
         currentFileContent = File.ReadAllText(CurrentNoteFilePath);
-        
-        //process and load yaml to data struct
+
+    //process and load yaml to data struct
         var parts = currentFileContent.Split("---", StringSplitOptions.RemoveEmptyEntries);
         var frontMatter = parts[0];
-        
-        try{
+
+        try
+        {
             var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
+                .WithNamingConvention(CamelCaseNamingConvention.Instance) // see height_in_inches in sample yml 
                 .IgnoreUnmatchedProperties()
                 .IgnoreFields()
                 .Build();
             CurrentNote = deserializer.Deserialize<Note>(frontMatter);
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Console.WriteLine(ex);
             Console.WriteLine(ex.InnerException);
@@ -91,4 +169,6 @@
 
         StateHasChanged();
     }
+
+
 }
