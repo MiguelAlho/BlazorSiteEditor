@@ -1,11 +1,8 @@
 @page "/Notes/Edit/{NoteFileName}"
 @using MiguelAlho.BlazorSiteEditor.Models
-@using MudBlazor.Extensions
 @inject IJSRuntime JsRuntime
 @implements IAsyncDisposable
 @using MiguelAlho.BlazorSiteEditor.Pages.Notes.Components
-@using Microsoft.Extensions.Primitives
-@using Markdig.Extensions.Mathematics
 @using IdGen
 
 <PageTitle>Edit - @CurrentNote.Title</PageTitle>
@@ -93,7 +90,7 @@
                         {
                             <MudCard>
                                 <MudCardHeader>
-                                    <b><MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)</b>
+                                    @note.Id - <b><MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)</b>
                                     <hr/>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -159,7 +156,7 @@
 
         currentFileContent = File.ReadAllText(CurrentNoteFilePath);
 
-    //process and load yaml to data struct
+        //process and load yaml to data struct
         var parts = currentFileContent.Split("---", StringSplitOptions.RemoveEmptyEntries);
         var frontMatter = parts[0];
 
@@ -171,6 +168,12 @@
                 .IgnoreFields()
                 .Build();
             CurrentNote = deserializer.Deserialize<Note>(frontMatter);
+
+            for (var i = 0; i < CurrentNote.Notes.Count; i++)
+            {
+                CurrentNote.Notes[i].Id = i;
+            }
+            //StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -204,6 +207,7 @@
         SetTimeFieldFromVideoTime();
         CurrentEntry.Type = EntryType.Quote;
     }
+    
     public async Task NewSlideClicked()
     {
         SetTimeFieldFromVideoTime();
@@ -211,10 +215,11 @@
     }
     
     [JSInvokable]
-    public async Task SaveFile()
+    public async Task SaveFile(string imageId)  //each image needs a unique reference to prevent getting the first one each time
     {
-        var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>("fileDataStream"); 
+        await using var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>(imageId); 
         await using var dataReferenceStream = await dataReference.OpenReadStreamAsync(maxAllowedSize: 10_000_000);
+        Console.WriteLine(dataReference.Length);
 
         //store image before referencing it
         var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
@@ -227,6 +232,9 @@
         await dataReferenceStream.CopyToAsync(createdFile);
         createdFile.Close();
         
+        dataReferenceStream.Close();
+        dataReferenceStream.Dispose();
+        
         CurrentEntry.Image = $"{CurrentNote.ImageFolderId}/{imageName}";
     }
 
@@ -237,17 +245,6 @@
         try
         {
             await JsModule.Value.InvokeAsync<byte[]>("getClipboardImageToPaste");
-            // Console.WriteLine(blob.Length);
-            //
-            // //store image before referencing it
-            // var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
-            // var imageDirFullPath = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{CurrentNote.ImageFolderId}";
-            //
-            // if (!Directory.Exists(imageDirFullPath))
-            //     Directory.CreateDirectory(imageDirFullPath);
-            //
-            // File.WriteAllBytes(Path.Combine(imageDirFullPath, imageName), blob);
-            // CurrentEntry.Image = $"{CurrentNote.ImageFolderId}/{imageName}";
         }
         catch (Exception ex)
         {
@@ -290,6 +287,7 @@
     
     public async Task AddEntry()
     {
+        CurrentEntry.Id = CurrentNote.Notes.Count;
         CurrentNote.Notes.Add(CurrentEntry);
         ClearEntry();
         StateHasChanged();

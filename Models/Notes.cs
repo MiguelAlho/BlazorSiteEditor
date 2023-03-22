@@ -22,6 +22,7 @@ namespace MiguelAlho.BlazorSiteEditor.Models;
 
     public class Entry
     {
+        public int Id { get; set; }
         public EntryType Type {get;set;} = EntryType.Quote;
         public string Time {get;set;} = string.Empty;
         public string Image {get;set;} = string.Empty;
