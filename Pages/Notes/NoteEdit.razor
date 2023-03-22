@@ -20,7 +20,8 @@
                         <MudPaper Class="pa-8">
                             <h3>Page Metadata</h3>
                             <MudTextField T="string" @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Author is required!"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Title is required!"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Url is required!"/>
+                            <MudTextField T="string" @bind-Value="CurrentNote.ImageFolderId" Label="ImageFolderId" Required="true" RequiredError="Folder id is required!"/>
                         </MudPaper>
                     </MudItem>
                     <MudItem xs="6">
