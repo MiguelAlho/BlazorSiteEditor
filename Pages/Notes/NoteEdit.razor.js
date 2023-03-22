@@ -77,3 +77,27 @@ export function getCurrentVideoTime() {
         return 0;
     }
 }
+
+export function setBlazorPageReference(blazorPageHook) {
+    window.blazorPageHook = blazorPageHook;
+}
+
+export async function getClipboardImageToPaste() {
+    try {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const clipboardItem of clipboardItems) {
+            const imageType = clipboardItem.types.find(type => type.startsWith('image/'))
+            const blob = await clipboardItem.getType(imageType);
+            const array = new Uint8Array(await blob.arrayBuffer());
+
+            window.fileDataStream = function () {
+                return array;
+            };
+
+            //Finally, invoke the save file back on our blazor page to come fetch the fileDataStream,
+            await window.blazorPageHook.invokeMethodAsync('SaveFile');
+        }
+    } catch (err) {
+        console.error(err.name, err.message);
+    }
+}

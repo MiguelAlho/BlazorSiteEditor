@@ -6,6 +6,7 @@
 @using MiguelAlho.BlazorSiteEditor.Pages.Notes.Components
 @using Microsoft.Extensions.Primitives
 @using Markdig.Extensions.Mathematics
+@using IdGen
 
 <PageTitle>Edit - @CurrentNote.Title</PageTitle>
 
@@ -60,6 +61,7 @@
                                 <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
                                 <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
                                 <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage"></MudIconButton>
                             </MudToolBar>
                         </MudStack>
                     </MudPaper>
@@ -132,6 +134,8 @@
 @code
 {
     private Lazy<IJSObjectReference> JsModule = new();
+    private DotNetObjectReference<NoteEdit> _blazorPageReference;
+    
     private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
 
     public Note CurrentNote { get; set; } = new();
@@ -183,6 +187,9 @@
         if (firstRender)
         {
             JsModule = new(await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/Notes/NoteEdit.razor.js"));
+            
+            _blazorPageReference = DotNetObjectReference.Create(this);
+            await JsModule.Value.InvokeAsync<object>("setBlazorPageReference", _blazorPageReference);
         }
     }
 
@@ -201,6 +208,51 @@
     {
         SetTimeFieldFromVideoTime();
         CurrentEntry.Type = EntryType.Slide;
+    }
+    
+    [JSInvokable]
+    public async Task SaveFile()
+    {
+        var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>("fileDataStream"); 
+        await using var dataReferenceStream = await dataReference.OpenReadStreamAsync(maxAllowedSize: 10_000_000);
+
+        //store image before referencing it
+        var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
+        var imageDirFullPath = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{CurrentNote.ImageFolderId}";
+
+        if (!Directory.Exists(imageDirFullPath))
+            Directory.CreateDirectory(imageDirFullPath);
+
+        var createdFile = File.Create(Path.Combine(imageDirFullPath, imageName));
+        await dataReferenceStream.CopyToAsync(createdFile);
+        createdFile.Close();
+        
+        CurrentEntry.Image = $"{CurrentNote.ImageFolderId}/{imageName}";
+    }
+
+    [JSInvokable]
+    public async Task PasteClipboardImage()
+    {
+        Console.WriteLine("reading blob");
+        try
+        {
+            await JsModule.Value.InvokeAsync<byte[]>("getClipboardImageToPaste");
+            // Console.WriteLine(blob.Length);
+            //
+            // //store image before referencing it
+            // var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
+            // var imageDirFullPath = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{CurrentNote.ImageFolderId}";
+            //
+            // if (!Directory.Exists(imageDirFullPath))
+            //     Directory.CreateDirectory(imageDirFullPath);
+            //
+            // File.WriteAllBytes(Path.Combine(imageDirFullPath, imageName), blob);
+            // CurrentEntry.Image = $"{CurrentNote.ImageFolderId}/{imageName}";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private async Task SetTimeFieldFromVideoTime()
@@ -250,6 +302,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        _blazorPageReference.Dispose();
         if(JsModule.IsValueCreated)
         {
             await JsModule.Value.DisposeAsync();

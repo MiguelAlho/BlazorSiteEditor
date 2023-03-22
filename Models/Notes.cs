@@ -1,3 +1,5 @@
+using IdGen;
+
 namespace MiguelAlho.BlazorSiteEditor.Models;
 
     public class Note
@@ -13,7 +15,9 @@ namespace MiguelAlho.BlazorSiteEditor.Models;
         public string Summary {get; set;} = string.Empty;
         public List<Entry> Notes {get; set;} = new List<Entry>();
         public string Content {get;set;} = string.Empty;
-        
+
+        public string ImageFolderId { get; set; } = new IdGenerator(0).CreateId().ToString();
+
     }
 
     public class Entry
