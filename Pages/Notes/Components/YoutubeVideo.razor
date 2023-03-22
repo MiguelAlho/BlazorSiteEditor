@@ -1,0 +1,41 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inject IJSRuntime JsRuntime
+@implements IAsyncDisposable
+
+<figure style="height: 500px;width: 100%;">
+    <iframe
+        id="bookmark-video"
+        class="has-ratio"
+        src="@(Link)?enablejsapi=1"
+        title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+    </iframe>
+</figure>
+
+@code {
+
+    [Parameter, Required]
+    public string Link { get; set; } = default!;
+
+    private Lazy<IJSObjectReference> JsModule = new();
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("after render in component");
+        if (firstRender)
+        {
+            Console.WriteLine("first render in component");
+            JsModule = new(await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/Notes/NoteEdit.razor.js"));
+            await JsModule.Value.InvokeVoidAsync("initializeYouTubePlayer");
+        }
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        if(JsModule.IsValueCreated)
+        {
+            await JsModule.Value.DisposeAsync();
+        }
+    }
+}

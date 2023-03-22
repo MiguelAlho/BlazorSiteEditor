@@ -1,9 +1,13 @@
 @page "/Notes/Edit/{NoteFileName}"
 @using MiguelAlho.BlazorSiteEditor.Models
 @using MudBlazor.Extensions
+@inject IJSRuntime JsRuntime
+@implements IAsyncDisposable
+@using MiguelAlho.BlazorSiteEditor.Pages.Notes.Components
+@using Microsoft.Extensions.Primitives
+@using Markdig.Extensions.Mathematics
 
 <PageTitle>Edit - @CurrentNote.Title</PageTitle>
-
 
 <MudPaper Class="pa-8">
     <MudTabs Border="true">
@@ -46,31 +50,22 @@
                 <MudItem xs="6">
                     <MudPaper Class="pa-8">
                         <MudStack>
-                            <figure style="height: 500px;width: 100%;">
-                                <iframe
-                                    id="bookmark-video"
-                                    class="has-ratio"
-                                    src="@(CurrentNote.Video.Link)?enablejsapi=1"
-                                    title="YouTube video player"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowfullscreen>
-                                </iframe>
-                            </figure>
+                            <YoutubeVideo Link="@CurrentNote.Video.Link" />
                             <MudToolBar>
                                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"></MudIconButton>
                                 <MudIconButton Icon="@Icons.Material.Filled.Pause"></MudIconButton>
                                 <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"></MudIconButton>
                                 <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"></MudIconButton>
                                 <MudSpacer></MudSpacer>
-                                <MudIconButton Icon="@Icons.Material.Filled.Note"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Comment"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Screenshot"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
                             </MudToolBar>
                         </MudStack>
                     </MudPaper>
                     <MudPaper Class="pa-8">
                         <MudStack>
-                            @* <MudTextField T="string" @bind-Value="CurrentEntry.Type.ToString()" Label="Type" Required="true" RequiredError="Type is required!"/> *@
+                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!"/>
                             <MudStack Row="true">
                                 <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
                                 <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
@@ -79,8 +74,8 @@
 
                             <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
                             <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
-                            <MudButton>Add</MudButton>
-                            <MudButton>Clear</MudButton>
+                            <MudButton OnClick="AddEntry">Add</MudButton>
+                            <MudButton OnClick="ClearEntry">Clear</MudButton>
                         </MudStack>
                     </MudPaper>
 
@@ -96,7 +91,7 @@
                         {
                             <MudCard>
                                 <MudCardHeader>
-                                    <b>@(note.Time) @(note.Title)</b>
+                                    <b><MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)</b>
                                     <hr/>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -136,12 +131,13 @@
 
 @code
 {
+    private Lazy<IJSObjectReference> JsModule = new();
+    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
+
     public Note CurrentNote { get; set; } = new();
     public Entry CurrentEntry { get; set; } = new();
 
-    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
-
-
+    
     private string CurrentNoteFilePath = string.Empty;
     private string currentFileContent = string.Empty;
 
@@ -180,7 +176,57 @@
 
         StateHasChanged();
     }
+    
+        
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JsModule = new(await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/Notes/NoteEdit.razor.js"));
+        }
+    }
 
+    public async Task NewNoteClicked()
+    {
+        SetTimeFieldFromVideoTime();
+        CurrentEntry.Type = EntryType.Note;
+    }
+    
+    public async Task NewCommentClicked()
+    {
+        SetTimeFieldFromVideoTime();
+        CurrentEntry.Type = EntryType.Quote;
+    }
+    public async Task NewSlideClicked()
+    {
+        SetTimeFieldFromVideoTime();
+        CurrentEntry.Type = EntryType.Slide;
+    }
+
+    private async Task SetTimeFieldFromVideoTime()
+    {
+        var time = await JsModule.Value.InvokeAsync<double>("getCurrentVideoTime");
+        
+        //build time string
+        var timeString = string.Empty;
+        if (time > 3600)
+            timeString = $"{ToIntStr(time / 3600)}:{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
+        else
+            timeString = $"{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
+
+        CurrentEntry.Time = timeString;
+    }
+    
+    private string ToIntStr(double time)
+    {
+        return Math.Floor(time).ToString("00");
+    }
+
+    public async Task SeekClicked(string time)
+    {
+        Console.WriteLine($"invoking seek {DateTime.UtcNow.ToString("HH:mm:sss")}");
+        await JsModule.Value.InvokeVoidAsync("seekToTime", time);
+    }
 
     private static string ImageToBase64DataSource(Entry note)
     {
@@ -188,5 +234,25 @@
         var ext = Path.GetExtension(path);
         var data = Convert.ToBase64String(File.ReadAllBytes(path));
         return $"data:image/{ext};base64,{data}";
+    }
+    
+    public async Task AddEntry()
+    {
+        CurrentNote.Notes.Add(CurrentEntry);
+        ClearEntry();
+        StateHasChanged();
+    }
+    
+    public async Task ClearEntry()
+    {
+        CurrentEntry = new Entry();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if(JsModule.IsValueCreated)
+        {
+            await JsModule.Value.DisposeAsync();
+        }
     }
 }
