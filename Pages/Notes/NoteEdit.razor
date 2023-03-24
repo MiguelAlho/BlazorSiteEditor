@@ -7,144 +7,268 @@
 
 <PageTitle>Edit - @CurrentNote.Title</PageTitle>
 
-<MudPaper Class="pa-8">
-    <MudTabs Border="true">
-        <MudTabPanel Text="Meta">
-            <MudStack>
-                <MudPaper Class="pa-8">
-                    <MudTextField T="string" @bind-Value="CurrentNote.Title" Label="Title" Required="true" RequiredError="Title is required!"/>
-                </MudPaper>
+<MudPaper Class="pa-5">
+<MudPaper Elevation="1" Class="mb-10">
+    <MudToolBar >
+        <MudSpacer></MudSpacer>
+        <MudButton OnClick="PublishBookmark">Publish</MudButton>
+        <MudButton OnClick="SaveBookmark">Save</MudButton>
+    </MudToolBar>
+</MudPaper>
+<MudTabs Border="true">
+<MudTabPanel Text="Meta">
 
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudPaper Class="pa-8">
-                            <h3>Page Metadata</h3>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Author" Label="Author" Required="true" RequiredError="Author is required!"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Url" Label="Url" Required="true" RequiredError="Url is required!"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.ImageFolderId" Label="ImageFolderId" Required="true" RequiredError="Folder id is required!"/>
-                        </MudPaper>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudPaper Class="pa-8">
-                            <h3>Video Metadata</h3>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Source" Label="Source" Required="true" RequiredError="Source is required!"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Id" Label="Id" Required="true" RequiredError="Id is required!"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Link" Label="Url" Required="true" RequiredError="Url is required!"/>
-                            <h4>Speaker</h4>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Name" Label="Speaker Type"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Twitter" Label="Speaker Twitter"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.LinkedIn" Label="Speaker LinkedIn"/>
-                            <h4>Event</h4>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Name" Label="Event Name"/>
-                            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Link" Label="Event Link"/>
-
-                        </MudPaper>
-                    </MudItem>
-                </MudGrid>
-            </MudStack>
-        </MudTabPanel>
-
-        <MudTabPanel Text="Video Notes">
+    <MudStack>
+        <MudPaper Class="pa-8">
+            <h3>Page Metadata</h3>
             <MudGrid>
                 <MudItem xs="6">
-                    <MudPaper Class="pa-8">
-                        <MudStack>
-                            <YoutubeVideo Link="@CurrentNote.Video.Link" />
-                            <MudToolBar>
-                                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Pause"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"></MudIconButton>
-                                <MudSpacer></MudSpacer>
-                                <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage"></MudIconButton>
-                            </MudToolBar>
-                        </MudStack>
-                    </MudPaper>
-                    <MudPaper Class="pa-8">
-                        <MudStack>
-                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!"/>
-                            <MudStack Row="true">
-                                <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
-                                <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
-                            </MudStack>
-                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to"/>
-
-                            <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
-                            <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
-                            <MudButton OnClick="AddEntry">Add</MudButton>
-                            <MudButton OnClick="ClearEntry">Clear</MudButton>
-                        </MudStack>
-                    </MudPaper>
-
+                    <MudTextField T="string" @bind-Value="CurrentNote.Title" Label="Title" Required="true" RequiredError="Title is required!"/>
+                    <MudTextField T="string" @bind-Value="CurrentNote.Author" Label="Notes Author" Required="true" RequiredError="Author is required!"/>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudStack Class="pa-8">
-                        <MudToolBar>
-                            <MudSpacer></MudSpacer>
-                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"></MudIconButton>
-                            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"></MudIconButton>
-                        </MudToolBar>
-                        @foreach (var note in CurrentNote.Notes)
-                        {
-                            <MudCard>
-                                <MudCardHeader>
-                                    @note.Id - <b><MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)</b>
-                                    <hr/>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    @if (!String.IsNullOrWhiteSpace(note.Image))
-                                    {
-                                        <img src="@ImageToBase64DataSource(note)" style="width:100%"/>
-                                    }
-                                    @if (!String.IsNullOrWhiteSpace(note.Content))
-                                    {
-                                        <blockquote class="pa-4">
-                                            @((MarkupString) (@Markdown.ToHtml(@note.Content) ?? ""))<br/>
-                                        </blockquote>
-                                    }
-                                    <blockquote class="pa-4">@note.Comment</blockquote>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudButton>Edit</MudButton>
-                                    <MudButton>Remove</MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        }
-
-                    </MudStack>
+                    <MudTextField T="string" @bind-Value="CurrentNote.Url" Label="Notes Url" Required="true" RequiredError="Url is required!"/>
+                    <MudTextField T="string" @bind-Value="CurrentNote.ImageFolderId" Label="Notes Image Folder Name" Required="true" RequiredError="Folder id is required!"/>
                 </MudItem>
             </MudGrid>
-        </MudTabPanel>
-        <MudTabPanel Text="File Content">
-            <div Class="pa-8">
-                <h2>Yaml</h2>
-                <pre>@currentFileContent</pre>
-            </div>
-        </MudTabPanel>
+        </MudPaper>
 
-    </MudTabs>
+        <MudPaper Class="pa-8">
+            <h3>Video Metadata</h3>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Source" Label="Source" Required="true" RequiredError="Source is required!"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Id" Label="Id" Required="true" RequiredError="Id is required!"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Link" Label="Url" Required="true" RequiredError="Url is required!"/>
+            <h4>Speaker</h4>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Name" Label="Speaker Type"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Twitter" Label="Speaker Twitter"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.LinkedIn" Label="Speaker LinkedIn"/>
+            <h4>Event</h4>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Name" Label="Event Name"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Link" Label="Event Link"/>
+
+        </MudPaper>
+
+    </MudStack>
+</MudTabPanel>
+@if (!String.IsNullOrWhiteSpace(CurrentNote.Video.Id))
+{
+    <MudTabPanel Text="Video Notes">
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Class="pa-8">
+                    <MudStack>
+                        <YoutubeVideo Link="@CurrentNote.Video.Link"/>
+                        <MudToolBar>
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Pause"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"></MudIconButton>
+                            <MudSpacer></MudSpacer>
+                            <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
+
+                        </MudToolBar>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudPaper Class="pa-8">
+                    <MudStack>
+                        <MudStack Row="true">
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
+                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!"/>
+                        </MudStack>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
+                        <MudStack Row="true">
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage"/>
+                        </MudStack>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
+                        <MudToolBar>
+                            <MudSpacer></MudSpacer>
+                            <MudButton OnClick="AddEntry">Add</MudButton>
+                            <MudButton OnClick="ClearEntry">Clear</MudButton>
+                        </MudToolBar>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Class="pa-8">
+                    @foreach (var note in CurrentNote.Notes.OrderByDescending(e => e.Id))
+                    {
+                        <MudCard>
+                            <MudCardHeader>
+                                @note.Id -
+                                <b>
+                                    <MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)
+                                </b>
+                                <hr/>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                @if (!String.IsNullOrWhiteSpace(note.Image))
+                                {
+                                    <img src="@ImageToBase64DataSource(note)" style="width:100%"/>
+                                }
+                                @if (!String.IsNullOrWhiteSpace(note.Content))
+                                {
+                                    <blockquote class="pa-4">
+                                        @((MarkupString) (@Markdown.ToHtml(@note.Content) ?? ""))<br/>
+                                    </blockquote>
+                                }
+                                <blockquote class="pa-4">@note.Comment</blockquote>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton>Edit</MudButton>
+                                <MudButton>Remove</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    }
+
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+}
+
+@if (CurrentNote.Article.Links.Any())
+{
+    <MudTabPanel Text="Article Notes">
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Class="pa-8">
+                    <MudStack>
+                        <MudToolBar>
+                            <MudSpacer></MudSpacer>
+                            <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
+                        </MudToolBar>
+
+                        <MudSelect T="string" @bind-Value="@currentLink">
+                            @foreach (var link in CurrentNote.Article.Links)
+                            {
+                                <MudSelectItem Value="@link"></MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        @if (currentLink != null)
+                        {
+                            <iframe src="@currentLink"
+                                    width="800"
+                                    height="800"
+                                    type="text/html">
+                            </iframe>
+                        }
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudPaper Class="pa-8">
+                    <MudStack>
+                        <MudStack Row="true">
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
+                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!"/>
+                        </MudStack>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
+                        <MudStack Row="true">
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage"/>
+                        </MudStack>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
+                        <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
+                        <MudToolBar>
+                            <MudSpacer></MudSpacer>
+                            <MudButton OnClick="AddEntry">Add</MudButton>
+                            <MudButton OnClick="ClearEntry">Clear</MudButton>
+                        </MudToolBar>
+                    </MudStack>
+                </MudPaper>
+
+                <MudStack Class="pa-8">
+                    @foreach (var note in CurrentNote.Notes.OrderByDescending(e => e.Id))
+                    {
+                        <MudCard>
+                            <MudCardHeader>
+                                @note.Id -
+                                <b>
+                                    <MudButton OnClick="@(() => SeekClicked(note.Time))">@(note.Time)</MudButton> @(note.Title)
+                                </b>
+                                <hr/>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                @if (!String.IsNullOrWhiteSpace(note.Image))
+                                {
+                                    <img src="@ImageToBase64DataSource(note)" style="width:100%"/>
+                                }
+                                @if (!String.IsNullOrWhiteSpace(note.Content))
+                                {
+                                    <blockquote class="pa-4">
+                                        @((MarkupString) (@Markdown.ToHtml(@note.Content) ?? ""))<br/>
+                                    </blockquote>
+                                }
+                                <blockquote class="pa-4">@note.Comment</blockquote>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton>Edit</MudButton>
+                                <MudButton>Remove</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    }
+
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+}
+
+<MudTabPanel Text="Summary">
+    <MudStack>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Class="pa-8">
+                    <h3>Summary</h3>
+                    <MudTextField T="string" @bind-Value="CurrentNote.Summary" Label="Summary" Lines="30"/>
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+    </MudStack>
+</MudTabPanel>
+
+<MudTabPanel Text="File Content">
+    <div Class="pa-8">
+        <h2>Yaml</h2>
+        <pre>@currentFileContent</pre>
+    </div>
+</MudTabPanel>
+
+<MudTabPanel Text="Preview">
+    <div style="height:100%; position: relative;">
+        <iframe src="http://localhost:1313/@CurrentNote.Url"></iframe>
+    </div>
+</MudTabPanel>
+</MudTabs>
 </MudPaper>
 
 
 @code
 {
+    //JS links
     private Lazy<IJSObjectReference> JsModule = new();
     private DotNetObjectReference<NoteEdit> _blazorPageReference;
-    
-    private string NotesDir = UserDefinitionsService.BookmarksFolderPath;
-
-    public Note CurrentNote { get; set; } = new();
-    public Entry CurrentEntry { get; set; } = new();
-
-    
-    private string CurrentNoteFilePath = string.Empty;
-    private string currentFileContent = string.Empty;
 
     [Parameter]
     public string? NoteFileName { get; set; }
+
+    //data
+    public BookmarkFile CurrentBookmarkFile { get; set; } = default!;
+    public Note CurrentNote { get; set; } = new();
+    public Entry CurrentEntry { get; set; } = new();
+    string currentLink { get; set; } = null;
+
+    private string currentFileContent = string.Empty;
 
 
     protected override void OnInitialized()
@@ -152,46 +276,19 @@
         if (String.IsNullOrWhiteSpace(NoteFileName))
             return;
 
-        var dir = new DirectoryInfo(NotesDir);
-        CurrentNoteFilePath = Path.Combine(dir.FullName, NoteFileName);
-
-        currentFileContent = File.ReadAllText(CurrentNoteFilePath);
-
-        //process and load yaml to data struct
-        var parts = currentFileContent.Split("---", StringSplitOptions.RemoveEmptyEntries);
-        var frontMatter = parts[0];
-
-        try
-        {
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance) // see height_in_inches in sample yml 
-                .IgnoreUnmatchedProperties()
-                .IgnoreFields()
-                .Build();
-            CurrentNote = deserializer.Deserialize<Note>(frontMatter);
-
-            for (var i = 0; i < CurrentNote.Notes.Count; i++)
-            {
-                CurrentNote.Notes[i].Id = i;
-            }
-            //StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            Console.WriteLine(ex.InnerException);
-        }
+        CurrentBookmarkFile = BookmarksService.LoadBookmark(NoteFileName);
+        CurrentNote = CurrentBookmarkFile.Note;
 
         StateHasChanged();
     }
-    
-        
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             JsModule = new(await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/Notes/NoteEdit.razor.js"));
-            
+
             _blazorPageReference = DotNetObjectReference.Create(this);
             await JsModule.Value.InvokeAsync<object>("setBlazorPageReference", _blazorPageReference);
         }
@@ -202,27 +299,27 @@
         SetTimeFieldFromVideoTime();
         CurrentEntry.Type = EntryType.Note;
     }
-    
+
     public async Task NewCommentClicked()
     {
         SetTimeFieldFromVideoTime();
         CurrentEntry.Type = EntryType.Quote;
     }
-    
+
     public async Task NewSlideClicked()
     {
         SetTimeFieldFromVideoTime();
         CurrentEntry.Type = EntryType.Slide;
     }
-    
+
     [JSInvokable]
-    public async Task SaveFile(string imageId)  //each image needs a unique reference to prevent getting the first one each time
+    public async Task SaveClipboardImageFile(string imageId) //each image needs a unique reference to prevent getting the first one each time
     {
-        await using var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>(imageId); 
+        await using var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>(imageId);
         await using var dataReferenceStream = await dataReference.OpenReadStreamAsync(maxAllowedSize: 10_000_000);
         Console.WriteLine(dataReference.Length);
 
-        //store image before referencing it
+    //store image before referencing it
         var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
         var imageDirFullPath = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{CurrentNote.ImageFolderId}";
 
@@ -232,10 +329,10 @@
         var createdFile = File.Create(Path.Combine(imageDirFullPath, imageName));
         await dataReferenceStream.CopyToAsync(createdFile);
         createdFile.Close();
-        
+
         dataReferenceStream.Close();
         dataReferenceStream.Dispose();
-        
+
         CurrentEntry.Image = $"{CurrentNote.ImageFolderId}/{imageName}";
     }
 
@@ -256,8 +353,8 @@
     private async Task SetTimeFieldFromVideoTime()
     {
         var time = await JsModule.Value.InvokeAsync<double>("getCurrentVideoTime");
-        
-        //build time string
+
+    //build time string
         var timeString = string.Empty;
         if (time > 3600)
             timeString = $"{ToIntStr(time / 3600)}:{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
@@ -266,7 +363,7 @@
 
         CurrentEntry.Time = timeString;
     }
-    
+
     private string ToIntStr(double time)
     {
         return Math.Floor(time).ToString("00");
@@ -285,15 +382,29 @@
         var data = Convert.ToBase64String(File.ReadAllBytes(path));
         return $"data:image/{ext};base64,{data}";
     }
-    
+
     public async Task AddEntry()
     {
         CurrentEntry.Id = CurrentNote.Notes.Count;
         CurrentNote.Notes.Add(CurrentEntry);
         ClearEntry();
         StateHasChanged();
+
+        SaveBookmark();
     }
-    
+
+    public void PublishBookmark()
+    {
+        CurrentNote.Draft = false;
+        CurrentNote.Date = DateTime.UtcNow;
+        SaveBookmark();
+    }
+
+    public void SaveBookmark()
+    {
+        BookmarksService.SaveBookmark(CurrentBookmarkFile);
+    }
+
     public async Task ClearEntry()
     {
         CurrentEntry = new Entry();
@@ -302,7 +413,7 @@
     public async ValueTask DisposeAsync()
     {
         _blazorPageReference.Dispose();
-        if(JsModule.IsValueCreated)
+        if (JsModule.IsValueCreated)
         {
             await JsModule.Value.DisposeAsync();
         }

@@ -98,7 +98,7 @@ export async function getClipboardImageToPaste() {
                 return array;
             };
 
-            await window.blazorPageHook.invokeMethodAsync('SaveFile', imageId)
+            await window.blazorPageHook.invokeMethodAsync('SaveClipboardImageFile', imageId)
                 .then(result => {
                     alert(imageId);
                     alert(result);

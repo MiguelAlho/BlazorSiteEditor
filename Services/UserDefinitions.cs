@@ -41,8 +41,6 @@ class UserDefinitionsService
             return $"{definitions.SiteRepositoryPath}{definitions.BookmarkImagesBaseFolderPath}";
         }
     }
-        
-
 }
 
 public class UserDefinitions

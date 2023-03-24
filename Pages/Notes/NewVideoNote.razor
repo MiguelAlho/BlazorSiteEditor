@@ -2,10 +2,9 @@
 @inject NavigationManager NavManager
 @using MiguelAlho.BlazorSiteEditor.Models;
 
-<h1>Add New Video Note</h1>
-
 <PageTitle>Add new video note</PageTitle>
 
+<h1>Add New Video Note</h1>
 <MudTimeline TimelinePosition="TimelinePosition.Start">
     <MudTimelineItem TimelineAlign="@TimelineAlign.End" >
         <ItemContent>
@@ -80,7 +79,7 @@
             NewNote.Title = match.Groups[1].Value;
         }
 
-        NewNote.Url = $"/bookmark-{NewNote.Title.Replace(" ","-")}";
+        NewNote.Url = $"/bookmarks/{NewNote.Title.Replace(" ","-")}";
         NewNote.Video.Id = id;
         NewNote.Video.Link = $"https://www.youtube.com/embed/{id}";
 
@@ -90,21 +89,15 @@
     public void OnSave()
     {
         try{
-            var deserializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
-                .Build();
-            var yaml = deserializer.Serialize(NewNote);
-            Console.WriteLine(yaml);
-
             var notesDir = UserDefinitionsService.BookmarksFolderPath;
             var fileName = $"{NewNote.Url.Replace("/","")}.md";
             var filePath = Path.Combine(notesDir, fileName);
 
-            //System.IO.File.Create(filePath);
-            System.IO.File.AppendAllLines(filePath, new[]{"---"});
-            System.IO.File.AppendAllText(filePath, yaml);
-            System.IO.File.AppendAllLines(filePath, new[]{"---"});
-
+            BookmarksService.SaveBookmark(new BookmarkFile(filePath)
+            {
+                Note = NewNote
+            });
+            
             NavManager.NavigateTo($"/Notes/Edit/{fileName}");
         }catch(Exception ex)
         {
