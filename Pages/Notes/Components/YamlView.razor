@@ -1,0 +1,12 @@
+﻿@using System.ComponentModel.DataAnnotations
+<div Class="pa-8">
+    <h2>Yaml</h2>
+    <pre>@CurrentBookmarkFileYaml</pre>
+</div>
+
+@code {
+
+    [Parameter, Required]
+    public string CurrentBookmarkFileYaml { get; set; }
+
+}

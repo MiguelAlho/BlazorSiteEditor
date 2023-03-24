@@ -98,12 +98,7 @@ export async function getClipboardImageToPaste() {
                 return array;
             };
 
-            await window.blazorPageHook.invokeMethodAsync('SaveClipboardImageFile', imageId)
-                .then(result => {
-                    alert(imageId);
-                    alert(result);
-                });
-           
+            await window.blazorPageHook.invokeMethodAsync('SaveClipboardImageFile', imageId);           
         }
     } catch (err) {
         console.error(err.name, err.message);

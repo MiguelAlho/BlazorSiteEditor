@@ -1,0 +1,12 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+<div style="height:calc(80vh); position: relative;">
+    <iframe src="http://localhost:1313/@Url"></iframe>
+</div>
+
+@code {
+
+    [Parameter, Required]
+    public string Url { get; set; } = default!;
+
+}

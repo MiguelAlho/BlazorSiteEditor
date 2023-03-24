@@ -48,19 +48,10 @@ class BookmarksService
     
     public static bool SaveBookmark(BookmarkFile bookmark)
     {
-        var fileContent = new StringBuilder();
-        
         try{
-            var deserializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)  // see height_in_inches in sample yml 
-                .Build();
-            var yaml = deserializer.Serialize(bookmark.Note);
-            
-            fileContent.AppendLine("---");
-            fileContent.AppendLine(yaml);
-            fileContent.AppendLine("---");
-            
-            File.WriteAllText(bookmark.FilePath, fileContent.ToString());
+            var fileContent = GenerateYamlString(bookmark);
+
+            File.WriteAllText(bookmark.FilePath, fileContent);
             return true;
             
         }catch(Exception ex)
@@ -69,6 +60,22 @@ class BookmarksService
             Console.WriteLine(ex.InnerException);
             return false;
         }
+    }
+
+    public static string GenerateYamlString(BookmarkFile bookmark)
+    {
+        var fileContent = new StringBuilder();
+
+        var deserializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance) // see height_in_inches in sample yml 
+            .Build();
+        var yaml = deserializer.Serialize(bookmark.Note);
+
+        fileContent.AppendLine("---");
+        fileContent.AppendLine(yaml);
+        fileContent.AppendLine("---");
+
+        return fileContent.ToString();
     }
 
     private static string GetBookmarkFilePath(string filename) 

@@ -28,7 +28,10 @@
     <MudTimelineItem TimelineAlign="@TimelineAlign.End">
         <ItemContent>
             <h3>Video meta</h3>
-
+            <MudTextField T="string" @bind-Value="NewNote.Video.Source" Label="Source" Required="true" RequiredError="Source is required!"/>
+            <MudTextField T="string" @bind-Value="NewNote.Video.Id" Label="Id" Required="true" RequiredError="Id is required!"/>
+            <MudTextField T="string" @bind-Value="NewNote.Video.Link" Label="Url" Required="true" RequiredError="Url is required!"/>
+            
             <h4>Talk Author</h4>
             <MudTextField T="string"  @bind-Value="NewNote.Video.Author.Name" Label="Talk Author Name" />
             <MudTextField T="string"  @bind-Value="NewNote.Video.Author.Twitter" Label="Twitter" />
@@ -43,7 +46,7 @@
     <MudTimelineItem TimelineAlign="@TimelineAlign.End">
         <ItemContent>
             <h3>Data:</h3>
-
+            <MudTextField T="string"  @bind-Value="@FileName" Label="FileName" />
             <MudButton OnClick="OnSave">
                 Save
             </MudButton>
@@ -56,7 +59,8 @@
 {
     public string VideoLink {get; set;} = string.Empty;
     public Note NewNote {get; set;} = new();
-
+    public string FileName { get; set; } = ".md";
+    
     protected override void OnInitialized()
     {
 
@@ -64,33 +68,25 @@
     
     public async Task TryLoadMetadata()
     {
-        var url = new System.Uri(VideoLink);
-        var queryParams = System.Web.HttpUtility.ParseQueryString(url.Query);
-        var id = queryParams["v"];
+        var meta = await YoutubeQueryService.GetYoutubeMetadata(VideoLink);
 
-        using var client = new HttpClient();
-        var content = await client.GetStringAsync(url);
-
-        //Thank you GPT
-        Regex regex = new Regex(@"""title"":{""simpleText"":""([^""]+)""}");
-        Match match = regex.Match(content);
-        if (match.Success)
+        if (meta != null)
         {
-            NewNote.Title = match.Groups[1].Value;
+            NewNote.Title = meta.Title;
+            NewNote.Url = $"/bookmarks/{NewNote.Title.Replace(" ", "-")}";
+            NewNote.Video.Id = meta.Id;
+            NewNote.Video.Link = meta.EmbedLink;
+            //initial file name
+            FileName = CreateFileName();
         }
-
-        NewNote.Url = $"/bookmarks/{NewNote.Title.Replace(" ","-")}";
-        NewNote.Video.Id = id;
-        NewNote.Video.Link = $"https://www.youtube.com/embed/{id}";
-
         StateHasChanged();
     }
-
+    
     public void OnSave()
     {
         try{
             var notesDir = UserDefinitionsService.BookmarksFolderPath;
-            var fileName = $"{NewNote.Url.Replace("/","")}.md";
+            var fileName = FileName;
             var filePath = Path.Combine(notesDir, fileName);
 
             BookmarksService.SaveBookmark(new BookmarkFile(filePath)
@@ -104,8 +100,10 @@
             Console.WriteLine(ex);
             Console.WriteLine(ex.InnerException);
         }
+    }
 
-        
-
+    private string CreateFileName()
+    {
+        return $"{NewNote.Url.Trim('/').Replace("/","-")}.md";
     }
 }

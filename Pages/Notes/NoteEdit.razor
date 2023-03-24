@@ -238,16 +238,11 @@
 </MudTabPanel>
 
 <MudTabPanel Text="File Content">
-    <div Class="pa-8">
-        <h2>Yaml</h2>
-        <pre>@currentFileContent</pre>
-    </div>
+    <YamlView CurrentBookmarkFileYaml="@BookmarksService.GenerateYamlString(@CurrentBookmarkFile)"/>
 </MudTabPanel>
 
 <MudTabPanel Text="Preview">
-    <div style="height:100%; position: relative;">
-        <iframe src="http://localhost:1313/@CurrentNote.Url"></iframe>
-    </div>
+    <Preview Url="@CurrentNote.Url"/>
 </MudTabPanel>
 </MudTabs>
 </MudPaper>
