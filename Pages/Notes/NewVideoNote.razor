@@ -73,7 +73,7 @@
         if (meta != null)
         {
             NewNote.Title = meta.Title;
-            NewNote.Url = $"/bookmarks/{NewNote.Title.Replace(" ", "-")}";
+            NewNote.Url = $"/bookmarks/{SanitizeTitle(NewNote.Title.Replace(" ","-"))}";
             NewNote.Video.Id = meta.Id;
             NewNote.Video.Link = meta.EmbedLink;
             //initial file name
@@ -102,8 +102,9 @@
         }
     }
 
-    private string CreateFileName()
-    {
-        return $"{NewNote.Url.Trim('/').Replace("/","-")}.md";
-    }
+    private string SanitizeTitle(string title) 
+        => Regex.Replace(title, "[^A-Za-z0-9 -]", "");
+
+    private string CreateFileName() 
+        => $"{DateTime.Today:yyyy-MM-dd}-videonote-{SanitizeTitle(NewNote.Title).Replace(" ","-")}.md";
 }
