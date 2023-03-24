@@ -308,13 +308,26 @@
     }
 
     [JSInvokable]
+    public async Task SetCurrentClipTime(double time)
+    {
+        Console.WriteLine($"SetCurrentClipTime invoked from JS {time.ToString()}");
+        string timeString;
+        timeString = time > 3600 
+            ? $"{ToIntStr(time / 3600)}:{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}" 
+            : $"{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
+
+        CurrentEntry.Time = timeString;
+        StateHasChanged();
+    }
+    
+    [JSInvokable]
     public async Task SaveClipboardImageFile(string imageId) //each image needs a unique reference to prevent getting the first one each time
     {
         await using var dataReference = await JsRuntime.InvokeAsync<IJSStreamReference>(imageId);
         await using var dataReferenceStream = await dataReference.OpenReadStreamAsync(maxAllowedSize: 10_000_000);
         Console.WriteLine(dataReference.Length);
 
-    //store image before referencing it
+        //store image before referencing it
         var imageName = $"{new IdGenerator(0).CreateId().ToString()}.png";
         var imageDirFullPath = $"{UserDefinitionsService.BookmarkImagesBaseFolderPath}/{CurrentNote.ImageFolderId}";
 
@@ -349,14 +362,14 @@
     {
         var time = await JsModule.Value.InvokeAsync<double>("getCurrentVideoTime");
 
-    //build time string
-        var timeString = string.Empty;
-        if (time > 3600)
-            timeString = $"{ToIntStr(time / 3600)}:{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
-        else
-            timeString = $"{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
-
-        CurrentEntry.Time = timeString;
+        //build time string
+        // var timeString = string.Empty;
+        // if (time > 3600)
+        //     timeString = $"{ToIntStr(time / 3600)}:{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
+        // else
+        //     timeString = $"{ToIntStr((time % 3600) / 60)}:{ToIntStr((time % 60) / 1)}";
+        //
+        // CurrentEntry.Time = timeString;
     }
 
     private string ToIntStr(double time)

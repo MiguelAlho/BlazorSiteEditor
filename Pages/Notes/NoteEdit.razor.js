@@ -4,6 +4,10 @@ window.ytAPIReady = false;
 window.playerReady = false;
 window.player = null;
 
+export function setBlazorPageReference(blazorPageHook) {
+    window.blazorPageHook = blazorPageHook;
+}
+
 export function initializeYouTubePlayer()
 {
     console.log("initialize called");
@@ -69,18 +73,15 @@ export function seekToTime(timeString) {
         console.log("player not found");
 }
 
-export function getCurrentVideoTime() {
+export async function getCurrentVideoTime() {
     if(player != null) {
-        console.log(player.getCurrentTime());
-        return player.getCurrentTime();
+        await window.blazorPageHook.invokeMethodAsync('SetCurrentClipTime', player.getCurrentTime());
     }else{
-        return 0;
+        await window.blazorPageHook.invokeMethodAsync('SetCurrentClipTime', 0.0);
     }
 }
 
-export function setBlazorPageReference(blazorPageHook) {
-    window.blazorPageHook = blazorPageHook;
-}
+
 
 export async function getClipboardImageToPaste() {
     try {
