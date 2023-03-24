@@ -42,6 +42,7 @@
             <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Name" Label="Speaker Type"/>
             <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Twitter" Label="Speaker Twitter"/>
             <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.LinkedIn" Label="Speaker LinkedIn"/>
+            <MudTextField T="string" @bind-Value="CurrentNote.Video.Author.Website" Label="Speaker Website" />
             <h4>Event</h4>
             <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Name" Label="Event Name"/>
             <MudTextField T="string" @bind-Value="CurrentNote.Video.Context.Link" Label="Event Link"/>
@@ -76,15 +77,21 @@
                 <MudPaper Class="pa-8">
                     <MudStack>
                         <MudStack Row="true">
+                            <MudIconButton Icon="@Icons.Material.Filled.Note" OnClick="NewNoteClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Comment" OnClick="NewCommentClicked"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Screenshot" OnClick="NewSlideClicked"></MudIconButton>
+                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!" Class="xs-3"/>
                             <MudTextField T="string" @bind-Value="CurrentEntry.Time" Label="Timestamp" Class="xs-3"/>
-                            <MudTextField T="EntryType" @bind-Value="CurrentEntry.Type" Label="Type" Required="true" RequiredError="Type is required!"/>
+                            
                         </MudStack>
-                        <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
                         <MudStack Row="true">
-                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to"/>
-                            <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.ContentPaste" OnClick="PasteClipboardImage" />
+                            <MudTextField T="string" @bind-Value="CurrentEntry.Image" Label="Image to link to" />
+
                         </MudStack>
-                        <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
+                        <MudDivider></MudDivider>
+                       <MudTextField T="string" @bind-Value="CurrentEntry.Title" Label="Title"/>
+                       <MudTextField T="string" @bind-Value="CurrentEntry.Content" Label="Main content" Lines="10"/>
                         <MudTextField T="string" @bind-Value="CurrentEntry.Comment" Label="Lateral comment" Lines="5"/>
                         <MudToolBar>
                             <MudSpacer></MudSpacer>

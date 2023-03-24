@@ -40,6 +40,7 @@ namespace MiguelAlho.BlazorSiteEditor.Models;
 
     public class Article
     {
+        public Author Author { get; set; } = new();
         public List<string> Links { get; set; } = new();
     }
 
@@ -57,6 +58,7 @@ namespace MiguelAlho.BlazorSiteEditor.Models;
         public string Name {get;set;} = string.Empty;
         public string Twitter {get;set;} = string.Empty;
         public string LinkedIn {get;set;} = string.Empty;
+        public string Website {get;set;} = string.Empty;
     }
 
     public class Context

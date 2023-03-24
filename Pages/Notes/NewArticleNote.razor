@@ -1,0 +1,98 @@
+@page "/Notes/NewArticleNote"
+@inject NavigationManager NavManager
+@using MiguelAlho.BlazorSiteEditor.Models;
+
+<PageTitle>Add new article note</PageTitle>
+
+<h1>Add New Article Note</h1>
+<MudTimeline TimelinePosition="TimelinePosition.Start">
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End" >
+        <ItemContent>
+            Start by adding the article link
+            <MudTextField T="string"  @bind-Value="ArticleLink" 
+                        Label="Article Link" Required="true" 
+                        RequiredError="Title is required!"
+            />
+            
+            <MudTextField T="string"  @bind-Value="NewNote.Title" Label="Title" 
+                          Required="true" RequiredError="Title is required!"
+                          TextChanged="OnTitleChanged"
+                          />
+                
+            <MudTextField T="string"  @bind-Value="NewNote.Url" Label="Page Url" 
+                Required="true" RequiredError="Url is required!"/>
+        </ItemContent>
+    </MudTimelineItem>
+
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
+        <ItemContent>
+            <h3>Article Author</h3>
+            <MudTextField T="string"  @bind-Value="NewNote.Article.Author.Name" Label="Author Name" />
+            <MudTextField T="string"  @bind-Value="NewNote.Article.Author.Twitter" Label="Twitter" />
+            <MudTextField T="string"  @bind-Value="NewNote.Article.Author.LinkedIn" Label="Linkedin" />
+            <MudTextField T="string"  @bind-Value="NewNote.Article.Author.Website" Label="Website" />
+
+        </ItemContent>
+    </MudTimelineItem>
+
+    <MudTimelineItem TimelineAlign="@TimelineAlign.End">
+        <ItemContent>
+            <h3>Data:</h3>
+            <MudTextField T="string"  @bind-Value="@FileName" Label="FileName" />
+            <MudButton OnClick="OnSave">
+                Save
+            </MudButton>
+        </ItemContent>
+    </MudTimelineItem>
+
+
+</MudTimeline>
+@code
+{
+    public string ArticleLink {get; set;} = string.Empty;
+    public Note NewNote {get; set;} = new()
+    {
+        Url = "/bookmarks/"
+    };
+    public string FileName { get; set; } = ".md";
+    
+    protected override void OnInitialized()
+    {
+
+    }
+    
+    public void OnSave()
+    {
+        try{
+            var notesDir = UserDefinitionsService.BookmarksFolderPath;
+            var fileName = FileName;
+            var filePath = Path.Combine(notesDir, fileName);
+
+            NewNote.Article.Links.Add(ArticleLink);
+            
+            BookmarksService.SaveBookmark(new BookmarkFile(filePath)
+            {
+                Note = NewNote
+            });
+            
+            NavManager.NavigateTo($"/Notes/Edit/{fileName}");
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+            Console.WriteLine(ex.InnerException);
+        }
+    }
+
+    private string SanitizeTitle(string title) 
+        => Regex.Replace(title, "[^A-Za-z0-9 -]", "");
+
+    private string CreateFileName() 
+        => $"{DateTime.Today:yyyy-MM-dd}-article-{SanitizeTitle(NewNote.Title).Replace(" ","-")}.md";
+
+    private void OnTitleChanged(string title)
+    {
+        NewNote.Url = $"/bookmarks/{SanitizeTitle(NewNote.Title.Replace(" ","-"))}";
+        FileName = CreateFileName();
+        StateHasChanged();
+    }
+}

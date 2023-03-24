@@ -6,10 +6,15 @@
 <MudToolBar>
     <MudSpacer />
     <MudButton ButtonType="ButtonType.Button" Title="Add Video Note"
-                Href=@($"/Notes/NewVideoNote")
-                StartIcon="@Icons.Material.Filled.Add" Color="@Color.Success">
+               Href=@($"/Notes/NewVideoNote")
+               StartIcon="@Icons.Material.Filled.Add" Color="@Color.Success" >
         Add Video Note
     </MudButton>
+    <MudButton ButtonType="ButtonType.Button" Title="Add Article Note"
+                    Href=@($"/Notes/NewArticleNote")
+                    StartIcon="@Icons.Material.Filled.Add" Color="@Color.Success">
+            Add Article Note
+        </MudButton>
 </MudToolBar>
 
 <ul>
