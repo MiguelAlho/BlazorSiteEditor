@@ -4,52 +4,65 @@
 <PageTitle>Settings</PageTitle>
 
 <h1>Settings</h1>
+<MudPaper Class="pa-8">
+    <MudTextField T="string" @bind-Value="Model.SiteRepositoryPath"
+                  Label="Path to site repository" Required="true"
+                  RequiredError="Path is required!"/>
+    <MudButton OnClick="ValidateSiteRepositoryPath">
+        ValidatePath
+    </MudButton>
 
-<MudTextField T="string"  @bind-Value="Model.SiteRepositoryPath" 
-            Label="Path to site repository" Required="true" 
-            RequiredError="Path is required!"
-            />
-<MudButton OnClick="ValidatePath">
-    ValidatePath
-</MudButton>
+    @if (pathIsValid)
+    {
+        <span>Path is valid.</span>
+    }
+    else
+    {
+        <span>Path does not exist.</span>
+    }
 
-@if (pathIsValid)
-{
-    <span>Path is valid.</span>
-}else{
-    <span>Path does not exist.</span>
-}
+    <MudTextField T="string" @bind-Value="Model.LocalHugoUrl"
+                  Label="Local site server url (Hugo)" Required="true"
+                  RequiredError="Url is required!"/>
 
-<MudButton OnClick="Save">
-    Save settings
-</MudButton>
+    <MudToolBar>
+        <MudSpacer></MudSpacer>
 
-@if (saved)
-{
-    <span>saved!</span>
-}else{
-    <span>not Saved</span>
-}
+
+        <MudButton OnClick="Save">
+            Save settings
+        </MudButton>
+
+        @if (saved)
+        {
+            <span>saved!</span>
+        }
+        else
+        {
+            <span>not Saved</span>
+        }
+    </MudToolBar>
+</MudPaper>
+
 
 @code
 {
-    public UserDefinitions Model {get; set;} = new();
+    public UserDefinitions Model { get; set; } = new();
 
     private bool pathIsValid = false;
     private bool saved = false;
 
     protected override void OnInitialized()
     {
-        if(!UserDefinitionsService.Exists())
+        if (!UserDefinitionsService.Exists())
             return;
 
         Model = UserDefinitionsService.Load();
     }
 
-    public void ValidatePath()
+    public void ValidateSiteRepositoryPath()
     {
         pathIsValid = Directory.Exists(Model.SiteRepositoryPath);
-        Console.WriteLine(pathIsValid);
         StateHasChanged();
     }
 
